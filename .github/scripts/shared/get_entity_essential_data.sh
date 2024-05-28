@@ -33,8 +33,6 @@ ky_get_entity_essential_data() {
       IFS="-" read -r -a date_components <<< "$date_starts"
       year="${date_components[0]}"
     fi
-  else
-    year=""
   fi
   
   # Code.
