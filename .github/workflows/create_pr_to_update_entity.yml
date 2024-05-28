@@ -1,0 +1,176 @@
+name: Create PR - Update Entity
+
+on:
+  workflow_call:
+    inputs:
+      type:
+        description: "Entity type: org or event."
+        required: true
+        type: string
+      template_filename:
+        description: "The template file name under the folder .github/ISSUE_TEMPLATE/."
+        required: true
+        type: string
+      reusable_workflow_repo:
+        description: "Only required for a forked reusable workflow repo."
+        required: false
+        type: string
+        default: "swingapi/entity-ci"
+      reusable_workflow_repo_ref:
+        description: "A ref to the reusable workflow repo being executed, such as a branch and a tag."
+        required: false
+        type: string
+        default: "main"
+    secrets:
+      token:
+        description: "Github token or PAT, default: github.token."
+        required: false
+
+jobs:
+  create-pr-to-update-entity:
+    runs-on: ubuntu-latest
+    env:
+      REPO_BASE_URL: "${{ github.server_url }}/${{ github.repository }}"
+      REUSABLE_WORKFLOW_DIR: entity-ci
+      ISSUE_PARSED_FILE: update_entity_issue.json
+
+    steps:
+      - name: Update Entity (Issue ${{ github.event.issue.number }})
+        run: echo "### Update Entity (Issue ${{ github.event.issue.number }})." >> $GITHUB_STEP_SUMMARY
+
+      - name: Checkout the caller workflow repo.
+        uses: actions/checkout@v4
+
+      - name: Checkout this reusable workflow repo (for *.sh scripts).
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.reusable_workflow_repo }}
+          ref: ${{ inputs.reusable_workflow_repo_ref }}
+          path: ${{ env.REUSABLE_WORKFLOW_DIR }}
+          token: ${{ secrets.token }}
+
+      # Convert issue to a temp json file.
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: stefanbuck/github-issue-praser@v3
+        id: issue-parser
+        with:
+          template-path: ".github/ISSUE_TEMPLATE/${{ inputs.template_filename }}"
+      - run: echo '${{ steps.issue-parser.outputs.jsonString }}' > "$ISSUE_PARSED_FILE"
+
+      # Update file for the existing entity.
+
+      - name: Update Entity File
+        id: update-entity-file
+        run: |
+          ./$REUSABLE_WORKFLOW_DIR/.github/scripts/update_entity_file.sh "${{ inputs.type }}" "$ISSUE_PARSED_FILE"
+          rm -rf "$REUSABLE_WORKFLOW_DIR"
+
+      - name: Update Entity File - Results
+        run: |
+          echo "Error: ${{ steps.update-entity-file.outputs.error }}"
+          echo "File Path: ${{ steps.update-entity-file.outputs.file_path }}"
+          echo "Original File Preview: ${{ steps.update-entity-file.outputs.original_file_preview }}"
+          echo "Updated File Preview: ${{ steps.update-entity-file.outputs.updated_file_preview }}"
+
+      # Create PR.
+
+      - name: Create Pull Request
+        id: cpr
+        if: steps.update-entity-file.outputs.error == ''
+        uses: peter-evans/create-pull-request@v6
+        with:
+          committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
+          author: Github Actions <noreply@github.com>
+          commit-message: |
+            ${{ github.event.issue.title }} - by ${{ github.triggering_actor }} (#${{ github.event.issue.number }})
+
+              File: ${{ steps.update-entity-file.outputs.file_path }}
+          title: ${{ github.event.issue.title }} - by ${{ github.triggering_actor }}
+          labels: |
+            update entity
+          branch: update-entity-${{ github.event.issue.number }}
+          delete-branch: true
+          body: |
+            Closes #${{ github.event.issue.number }}
+
+            **File Path**
+            > [${{ steps.update-entity-file.outputs.file_path }}][1].
+
+            **Original File Preview**
+            ```json
+            ${{ steps.update-entity-file.outputs.original_file_preview }}
+            ```
+
+            **Updated File Preview**
+            ```json
+            ${{ steps.update-entity-file.outputs.updated_file_preview }}
+            ```
+
+            [1]: ${{ github.server_url }}/${{ github.repository }}/blob/main/${{ steps.update-entity-file.outputs.file_path }}
+
+      # Leave a comment on the issue.
+
+      - name: Add Comment - Success
+        if: steps.update-entity-file.outputs.error == null
+        uses: actions/github-script@v7
+        env:
+          RESULTS_FILE_PATH: ${{ steps.update-entity-file.outputs.file_path }}
+          RESULTS_ORIGINAL_FILE_PREVIEW: ${{ steps.update-entity-file.outputs.original_file_preview }}
+          RESULTS_UPDATED_FILE_PREVIEW: ${{ steps.update-entity-file.outputs.updated_file_preview }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const {
+              RESULTS_FILE_PATH,
+              RESULTS_ORIGINAL_FILE_PREVIEW,
+              RESULTS_UPDATED_FILE_PREVIEW,
+              PR_NUMBER
+            } = process.env;
+
+            const body = `
+            Thank you for your submission!
+
+            The progress of updating entity will be tracked at PR #${PR_NUMBER}.
+
+            **File Path**
+            > [${RESULTS_FILE_PATH}](${ process.env.REPO_BASE_URL }/blob/main/${RESULTS_FILE_PATH})
+
+            **Original File Preview**
+            \`\`\`json
+            ${RESULTS_ORIGINAL_FILE_PREVIEW}
+            \`\`\`
+
+            **Updated File Preview**
+            \`\`\`json
+            ${RESULTS_UPDATED_FILE_PREVIEW}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
+      - name: Add Comment - Failure
+        if: ${{ failure() || steps.update-entity-file.outputs.error != null }}
+        uses: actions/github-script@v7
+        env:
+          RESULTS_ERROR: ${{ steps.update-entity-file.outputs.error || 'Unknown.' }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `
+            ERROR: ${ process.env.RESULTS_ERROR }
+
+            [**Related Workflows for Reference**](${ process.env.REPO_BASE_URL }/actions/runs/${{ github.run_id }})
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
