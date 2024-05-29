@@ -28,7 +28,7 @@ ky_get_entity_essential_data() {
   # Year.
   if [ "$ENTITY_TYPE" = "event" ]; then 
     year="$(jq -r '.year' "$INPUT_FILE")"
-    if [ -z "$year" ]; then
+    if [ "$year" = null ] || [ -z "$year" ]; then
       local date_starts; date_starts="$(jq -r '.date_starts' "$INPUT_FILE")"
       IFS="-" read -r -a date_components <<< "$date_starts"
       year="${date_components[0]}"
