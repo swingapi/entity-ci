@@ -67,7 +67,7 @@ ky_get_entity_essential_data() {
 
   # Check if template file exists.
   template_file="$region_dir/$KY_TEMPLATE_ID.json"
-  if [ ! -e "$template_file" ]; then
+  if [ ! -f "$template_file" ]; then
     echo >&2
     echo "### Template File Not Found: $template_file, create it." >&2
     cp -v "$KY_TEMPLATE_ID.json" "$template_file" >&2
