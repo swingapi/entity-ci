@@ -58,7 +58,9 @@ jobs:
         id: issue-parser
         with:
           template-path: ".github/ISSUE_TEMPLATE/${{ inputs.template_filename }}"
-      - run: echo '${{ steps.issue-parser.outputs.jsonString }}' > "$ISSUE_PARSED_FILE"
+      - env:
+          JSON_STRING: ${{ steps.issue-parser.outputs.jsonString }}
+        run: echo "$JSON_STRING" > "$ISSUE_PARSED_FILE"
 
       # Create file for the new entity.
 
@@ -69,10 +71,14 @@ jobs:
           rm -rf "$REUSABLE_WORKFLOW_DIR"
 
       - name: Create Entity File - Results
+        env:
+          RESULTS_ERROR: ${{ steps.create-entity-file.outputs.error }}
+          RESULTS_FILE_PATH: ${{ steps.create-entity-file.outputs.file_path }}
+          RESULTS_FILE_PREVIEW: ${{ steps.create-entity-file.outputs.file_preview }}
         run: |
-          echo "Error: ${{ steps.create-entity-file.outputs.error }}"
-          echo "File Path: ${{ steps.create-entity-file.outputs.file_path }}"
-          echo "File Preview: ${{ steps.create-entity-file.outputs.file_preview }}"
+          echo "Error: $RESULTS_ERROR"
+          echo "File Path: $RESULTS_FILE_PATH"
+          echo "File Preview: $RESULTS_FILE_PREVIEW"
 
       # Create PR.
 

@@ -58,7 +58,9 @@ jobs:
         id: issue-parser
         with:
           template-path: ".github/ISSUE_TEMPLATE/${{ inputs.template_filename }}"
-      - run: echo '${{ steps.issue-parser.outputs.jsonString }}' > "$ISSUE_PARSED_FILE"
+      - env:
+          JSON_STRING: ${{ steps.issue-parser.outputs.jsonString }}
+        run: echo "$JSON_STRING" > "$ISSUE_PARSED_FILE"
 
       # Update file for the existing entity.
 
@@ -69,11 +71,16 @@ jobs:
           rm -rf "$REUSABLE_WORKFLOW_DIR"
 
       - name: Update Entity File - Results
+        env:
+          RESULTS_ERROR: ${{ steps.update-entity-file.outputs.error }}
+          RESULTS_FILE_PATH: ${{ steps.update-entity-file.outputs.file_path }}
+          RESULTS_ORIGINAL_FILE_PREVIEW: ${{ steps.update-entity-file.outputs.original_file_preview }}
+          RESULTS_UPDATED_FILE_PREVIEW: ${{ steps.update-entity-file.outputs.updated_file_preview }}
         run: |
-          echo "Error: ${{ steps.update-entity-file.outputs.error }}"
-          echo "File Path: ${{ steps.update-entity-file.outputs.file_path }}"
-          echo "Original File Preview: ${{ steps.update-entity-file.outputs.original_file_preview }}"
-          echo "Updated File Preview: ${{ steps.update-entity-file.outputs.updated_file_preview }}"
+          echo "Error: $RESULTS_ERROR"
+          echo "File Path: $RESULTS_FILE_PATH"
+          echo "Original File Preview: $RESULTS_ORIGINAL_FILE_PREVIEW"
+          echo "Updated File Preview: $RESULTS_UPDATED_FILE_PREVIEW"
 
       # Create PR.
 
