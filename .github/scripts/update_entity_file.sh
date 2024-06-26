@@ -43,6 +43,16 @@ echo "- ENTITY_FILE: $ENTITY_FILE"
 echo "- TEMPLATE_FILE: $TEMPLATE_FILE"
 # echo "- error_msg: $error_msg"
 
+if [ "$error_msg" != "" ]; then
+  echo
+  if [ -n "$LOCAL_DEBUG" ]; then
+    echo "error=$error_msg"
+  else
+    echo "error=$error_msg" >> "$GITHUB_OUTPUT"
+  fi
+  exit 1
+fi
+
 # Verify Entity
 if [ "$ENTITY_TYPE" = "event" ] && [ -z "$YEAR" ]; then
   error_msg="Invalid entity essential data - YEAR: $YEAR"

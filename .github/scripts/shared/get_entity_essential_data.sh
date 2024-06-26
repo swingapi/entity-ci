@@ -42,7 +42,16 @@ ky_get_entity_essential_data() {
   code=${region_components[0]}
 
   # Entity ID.
-  entity_id="$(jq -r '.id' "$INPUT_FILE")"
+  local name; name="$(jq -r '.name' "$INPUT_FILE")"
+  entity_id="$(__get_entity_id "$ENTITY_TYPE" "$name" "$year")"
+  if [ -z "$entity_id" ]; then
+    error_msg="Invalid Entity ID Generated from Name."
+    local array_string; array_string=$(ky_join_strings "$year" "$code" "$entity_id" "$entity_file" "$template_file" "$error_msg")
+    echo "$array_string"
+    exit 0
+  fi
+  local tmp; tmp=$(mktemp)
+  jq --arg jq_value "$entity_id" '.id = $jq_value' "$INPUT_FILE" > "$tmp" && mv "$tmp" "$INPUT_FILE"
 
   echo "year: $year, region: $region, code: $code, entity_id: $entity_id" >&2
 
@@ -91,4 +100,59 @@ ky_join_strings() {
   local array_string; array_string="$(printf "${KY_STRING_DELIMITER}%s" "$@")"
   array_string="${array_string:${#separator}}"
   echo "$array_string"
+}
+
+# MARK: _Get Entity ID from Name
+__get_entity_id() {
+  local INPUT_ENTITY_TYPE=$1
+  local INPUT_NAME=$2
+  local INPUT_YEAR=$3 # Only required when INPUT_ENTITY_TYPE="event".
+
+  if [ -z "$INPUT_NAME" ]; then
+    echo ""
+    return
+  fi
+
+  local entity_id
+  entity_id="$(echo "$INPUT_NAME" | awk '{$1=$1};1')" # Rm leading & trailing whitespaces.
+  entity_id="${entity_id//\'/}" # Rm "'".
+  entity_id="${entity_id//[^a-zA-Z0-9]/ }" # Keep alpha & digit only chars, replace others with whitespace.
+  entity_id="$(echo "$entity_id" | tr -s " ")" # Replace multiple whitespaces with one.
+  entity_id="$(echo "${entity_id// /-}" | tr "[:upper:]" "[:lower:]")" # Replace whitespace to "-", and convert to lower case.
+
+  if [ "$INPUT_ENTITY_TYPE" = "event" ]; then
+    entity_id="${entity_id}-${INPUT_YEAR}"
+  fi
+  echo "$entity_id"
+}
+
+__test_get_entity_id() {
+  local name result
+  echo "  - > ${FUNCNAME[0]}"
+
+  # Org
+  name="abc"; result="$(__get_entity_id "org" "abc")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  name="ab-c"; result="$(__get_entity_id "org" "Ab C")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  name="b-c"; result="$(__get_entity_id "org" " b. !C ")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  name="b-c"; result="$(__get_entity_id "org" " b. !C " "2024")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  # Event
+  name="bs-c-2024"; result="$(__get_entity_id "event" " b's. !C " "2024")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  echo "  - v ${FUNCNAME[0]}"
+}
+
+
+# MARK: - Tests
+test_get_entity_essential_data_sh() {
+  echo "# Start ${FUNCNAME[0]} ..."
+  __test_get_entity_id
 }
