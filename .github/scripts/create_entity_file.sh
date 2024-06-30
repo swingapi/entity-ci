@@ -11,7 +11,8 @@ elif [ -z "$2" ]; then
 fi
 ENTITY_TYPE=$1
 INPUT_FILE=$2
-LOCAL_DEBUG=$3
+INPUT_CONTRIBUTOR=$3
+LOCAL_DEBUG=$4
 
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/constants.sh"
@@ -85,10 +86,11 @@ tmp=$(mktemp)
 jq 'del(.region)' "$EDIT_FILE" > "$tmp" && mv "$tmp" "$EDIT_FILE"
 
 if [ "$ENTITY_TYPE" = "org" ]; then
-  ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_ORG_ARRAY_KEYS[@]}"
+  ky_update_file_to_convert_value_from_array_to_string "$EDIT_FILE" "${KY_ORG_ARRAY_KEYS[@]}"
 elif [ "$ENTITY_TYPE" = "event" ]; then
-  ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_EVENT_ARRAY_KEYS[@]}"
+  ky_update_file_to_convert_value_from_array_to_string "$EDIT_FILE" "${KY_EVENT_ARRAY_KEYS[@]}"
 fi
+ky_update_file_to_update_contributors "$EDIT_FILE" "$INPUT_CONTRIBUTOR"
 ky_update_file_to_delete_all_empty_key_value_pairs "$EDIT_FILE"
 
 # Update values: reset empty string to null.

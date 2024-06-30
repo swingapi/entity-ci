@@ -66,8 +66,10 @@ jobs:
 
       - name: Create Entity File
         id: create-entity-file
+        env:
+          CONTRIBUTOR: ${{ github.event.issue.user.login }}
         run: |
-          ./$REUSABLE_WORKFLOW_DIR/.github/scripts/create_entity_file.sh "${{ inputs.type }}" "$ISSUE_PARSED_FILE"
+          ./$REUSABLE_WORKFLOW_DIR/.github/scripts/create_entity_file.sh "${{ inputs.type }}" "$ISSUE_PARSED_FILE" "$CONTRIBUTOR"
           rm -rf "$REUSABLE_WORKFLOW_DIR"
 
       - name: Create Entity File - Results
@@ -90,10 +92,10 @@ jobs:
           committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
           author: Github Actions <noreply@github.com>
           commit-message: |
-            ${{ github.event.issue.title }} - by ${{ github.triggering_actor }} (#${{ github.event.issue.number }})
+            ${{ github.event.issue.title }} - by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
 
               File: ${{ steps.create-entity-file.outputs.file_path }}
-          title: ${{ github.event.issue.title }} - by ${{ github.triggering_actor }}
+          title: ${{ github.event.issue.title }} - by ${{ github.event.issue.user.login }}
           labels: |
             add entity
           branch: add-entity-${{ github.event.issue.number }}

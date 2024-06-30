@@ -11,7 +11,8 @@ elif [ -z "$2" ]; then
 fi
 ENTITY_TYPE=$1
 INPUT_FILE=$2
-LOCAL_DEBUG=$3
+INPUT_CONTRIBUTOR=$3
+LOCAL_DEBUG=$4
 
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/constants.sh"
@@ -85,6 +86,8 @@ EDIT_FILE=$(ky_prepare_edit_file_to_update_entity "$ENTITY_FILE")
 
 # Update the edit file with the info from the input file.
 ky_update_file_with_modified_data "$EDIT_FILE" "$INPUT_FILE"
+# Update contributors
+ky_update_file_to_update_contributors "$EDIT_FILE" "$INPUT_CONTRIBUTOR"
 
 # Delete all empty key-value pairs.
 ky_update_file_to_delete_all_empty_key_value_pairs "$EDIT_FILE"
