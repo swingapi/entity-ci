@@ -19,6 +19,15 @@ ky_update_file_to_convert_value_from_array_to_string() {
   done
 }
 
+ky_update_file_with_updated_at() {
+  local INPUT_JSON_FILE=$1
+
+  local updated_at; updated_at="$(date -u '+%Y-%m-%d %H:%M')" # UTC
+  local tmp; tmp=$(mktemp)
+  jq --arg jq_key "updated_at" --arg jq_value "$updated_at" '.[$jq_key] = $jq_value' "$INPUT_JSON_FILE" > "$tmp"
+  mv "$tmp" "$INPUT_JSON_FILE"
+}
+
 ky_update_file_to_update_contributors() {
   local INPUT_JSON_FILE=$1
   local INPUT_CONTRIBUTOR=$2

@@ -90,6 +90,7 @@ if [ "$ENTITY_TYPE" = "org" ]; then
 elif [ "$ENTITY_TYPE" = "event" ]; then
   ky_update_file_to_convert_value_from_array_to_string "$EDIT_FILE" "${KY_EVENT_ARRAY_KEYS[@]}"
 fi
+ky_update_file_with_updated_at "$EDIT_FILE"
 ky_update_file_to_update_contributors "$EDIT_FILE" "$INPUT_CONTRIBUTOR"
 ky_update_file_to_delete_all_empty_key_value_pairs "$EDIT_FILE"
 
