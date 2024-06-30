@@ -3,8 +3,8 @@
 ky_sort_json_file() {
   local INPUT_ENTITY_FILE=$1
 
-  local region_dir; region_dir="$(dirname "$INPUT_ENTITY_FILE")"
-  local json_template_file="$region_dir/$KY_TEMPLATE_ID.json"
+  # local region_dir; region_dir="$(dirname "$INPUT_ENTITY_FILE")"
+  local json_template_file="$KY_TEMPLATE_ID.json"
 
   echo >&2
   echo "### Sort $INPUT_ENTITY_FILE with $json_template_file" >&2

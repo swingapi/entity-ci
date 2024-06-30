@@ -24,7 +24,7 @@ source "$(dirname "$0")/shared/get_entity_essential_data.sh"
 
 # Get entity essential data.
 
-# read -r CODE ENTITY_ID ENTITY_FILE TEMPLATE_FILE error_msg <<< $(ky_get_entity_essential_data $INPUT_FILE $LOCAL_DEBUG)
+# read -r CODE ENTITY_ID ENTITY_FILE error_msg <<< $(ky_get_entity_essential_data $INPUT_FILE $LOCAL_DEBUG)
 read -r entity_essential_data <<< "$(ky_get_entity_essential_data "$ENTITY_TYPE" "$INPUT_FILE" "$LOCAL_DEBUG")"
 IFS=$'\n' read -rd '' -a entity_essential_data_values <<< "${entity_essential_data//$KY_STRING_DELIMITER/$'\n'}" || 'true'
 
@@ -32,8 +32,7 @@ YEAR=${entity_essential_data_values[0]} # For event type only
 CODE=${entity_essential_data_values[1]}
 ENTITY_ID=${entity_essential_data_values[2]}
 ENTITY_FILE=${entity_essential_data_values[3]}
-TEMPLATE_FILE=${entity_essential_data_values[4]}
-error_msg=${entity_essential_data_values[5]}
+error_msg=${entity_essential_data_values[4]}
 
 echo
 echo "### Entity Essential Data:"
@@ -41,7 +40,6 @@ echo "- YEAR: $YEAR"
 echo "- CODE: $CODE"
 echo "- ENTITY_ID: $ENTITY_ID"
 echo "- ENTITY_FILE: $ENTITY_FILE"
-echo "- TEMPLATE_FILE: $TEMPLATE_FILE"
 # echo "- error_msg: $error_msg"
 
 if [ "$error_msg" != "" ]; then
@@ -57,7 +55,7 @@ fi
 # Verify Entity
 if [ "$ENTITY_TYPE" = "event" ] && [ -z "$YEAR" ]; then
   error_msg="Invalid entity essential data - YEAR: $YEAR"
-elif [ -z "$CODE" ] || [ -z "$ENTITY_ID" ] || [ -z "$ENTITY_FILE" ] || [ -z "$TEMPLATE_FILE" ]; then
+elif [ -z "$CODE" ] || [ -z "$ENTITY_ID" ] || [ -z "$ENTITY_FILE" ]; then
   error_msg="Invalid entity essential data."
 fi
 

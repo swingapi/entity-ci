@@ -31,8 +31,7 @@ YEAR=${entity_essential_data_values[0]} # For event type only
 CODE=${entity_essential_data_values[1]}
 ENTITY_ID=${entity_essential_data_values[2]}
 ENTITY_FILE=${entity_essential_data_values[3]}
-TEMPLATE_FILE=${entity_essential_data_values[4]}
-error_msg=${entity_essential_data_values[5]}
+error_msg=${entity_essential_data_values[4]}
 
 echo
 echo "### Entity Essential Data:"
@@ -40,7 +39,6 @@ echo "- YEAR: $YEAR"
 echo "- CODE: $CODE"
 echo "- ENTITY_ID: $ENTITY_ID"
 echo "- ENTITY_FILE: $ENTITY_FILE"
-echo "- TEMPLATE_FILE: $TEMPLATE_FILE"
 # echo "- error_msg: $error_msg"
 
 if [ "$error_msg" != "" ]; then
@@ -56,7 +54,7 @@ fi
 # Verify Entity
 if [ "$ENTITY_TYPE" = "event" ] && [ -z "$YEAR" ]; then
   error_msg="Invalid entity essential data - YEAR: $YEAR"
-elif [ -z "$CODE" ] || [ -z "$ENTITY_ID" ] || [ -z "$ENTITY_FILE" ] || [ -z "$TEMPLATE_FILE" ]; then
+elif [ -z "$CODE" ] || [ -z "$ENTITY_ID" ] || [ -z "$ENTITY_FILE" ]; then
   error_msg="Invalid entity essential data."
 fi
 
@@ -83,7 +81,7 @@ elif [ "$ENTITY_TYPE" = "event" ]; then
 fi
 
 # Prepare edit file to update entity.
-EDIT_FILE=$(ky_prepare_edit_file_to_update_entity "$TEMPLATE_FILE" "$ENTITY_FILE")
+EDIT_FILE=$(ky_prepare_edit_file_to_update_entity "$ENTITY_FILE")
 
 # Update the edit file with the info from the input file.
 ky_update_file_with_modified_data "$EDIT_FILE" "$INPUT_FILE"

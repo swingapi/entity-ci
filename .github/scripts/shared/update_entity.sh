@@ -1,7 +1,6 @@
 #!/bin/bash
 
 ky_prepare_edit_file_to_update_entity() {
-  local TEMPLATE_FILE=$1
   local ENTITY_FILE=$2
 
   # echo
@@ -13,6 +12,7 @@ ky_prepare_edit_file_to_update_entity() {
   local temp_edit_file="~update_entity.json"
 
   echo >&2
+  local TEMPLATE_FILE="$KY_TEMPLATE_ID.json"
   echo "### Create an edit file ($temp_edit_file) based on the template file ($TEMPLATE_FILE)." >&2
   cp -v "$TEMPLATE_FILE" "$temp_edit_file" >&2
 

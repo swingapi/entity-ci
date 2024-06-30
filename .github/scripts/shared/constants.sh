@@ -2,7 +2,7 @@
 
 # Shared Constants
 
-KY_TEMPLATE_ID="0_template"
+KY_TEMPLATE_ID="0_TEMPLATE"
 export KY_TEMPLATE_ID
 
 KY_STRING_DELIMITER=",ky,"
