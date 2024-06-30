@@ -46,7 +46,7 @@ ky_update_file_with_modified_data() {
 
   local modified_fields_value; modified_fields_value="$(jq -r '.modified_fields | join(",")' "$INPUT_FILE")"
 
-  IFS=',' read -r -a modified_fields <<< "$modified_fields_value"
+  IFS=',' read -r -a modified_fields <<< "$modified_fields_value" || 'true'
 
   # echo "Modified Fields:" >&2
   local modified_keys=()
