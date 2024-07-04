@@ -1,7 +1,8 @@
 #!/bin/bash
 
+# MARK: Prepare Edit File
 ky_prepare_edit_file_to_update_entity() {
-  local ENTITY_FILE=$2
+  local ENTITY_FILE=$1
 
   # echo
   # echo "Update File: $INPUT_FILE - Delete all empty key-value pairs." >&2
@@ -38,7 +39,38 @@ ky_prepare_edit_file_to_update_entity() {
   echo "$temp_edit_file"
 }
 
+# MARK: Update File
+# Update the edit file with the modified data from the input file.
 ky_update_file_with_modified_data() {
+  local EDIT_FILE=$1
+  local INPUT_FILE=$2
+
+  echo >&2
+  echo "### UPDATE FILE ($EDIT_FILE): Apply the modified data from the input file ($INPUT_FILE)." >&2
+
+  local tmp; tmp=$(mktemp)
+  local value
+
+  while read -r key; do
+    value=$(jq -r ".${key}" "$INPUT_FILE")
+    if [ -z "$value" ]; then
+      continue
+    fi
+
+    echo "- [Modified] $key: $value" >&2
+    if [ "$value" = "x" ]; then
+      value=""
+    elif [ "$key" = "styles" ]; then
+      value="${value#"UPDATE"}"
+      value="${value#","}"
+    fi
+    jq --arg jq_key "$key" --arg jq_value "$value" '.[$jq_key] = $jq_value' "$EDIT_FILE" > "$tmp" && mv "$tmp" "$EDIT_FILE"
+
+  done < <(jq -r 'keys_unsorted[]' "$ENTITY_FILE")
+}
+
+# MARK: - _LEGACY
+__ky_update_file_with_modified_data() {
   local EDIT_FILE=$1
   local INPUT_FILE=$2
 
