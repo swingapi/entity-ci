@@ -111,9 +111,12 @@ __get_entity_id() {
   local entity_id
   entity_id="$(echo "$INPUT_NAME" | awk '{$1=$1};1')" # Rm leading & trailing whitespaces.
   entity_id="${entity_id//\'/}" # Rm "'".
-  entity_id="${entity_id//[^a-zA-Z0-9]/ }" # Keep alpha & digit only chars, replace others with whitespace.
+  entity_id="${entity_id// & /-n-}" # Replace " & " with "-n-".
+  entity_id="${entity_id//&/-n-}" # Replace "&" with "-n-".
+  entity_id="${entity_id//[^a-zA-Z0-9-]/ }" # Keep "-", alpha & digit only chars, replace others with whitespace.
   entity_id="$(echo "$entity_id" | tr -s " ")" # Replace multiple whitespaces with one.
   entity_id="$(echo "${entity_id// /-}" | tr "[:upper:]" "[:lower:]")" # Replace whitespace to "-", and convert to lower case.
+  entity_id="$(echo "$entity_id" | tr -s "-")" # Replace multiple "-" with one.
 
   if [ "$INPUT_ENTITY_TYPE" = "event" ]; then
     entity_id="${entity_id}-${INPUT_YEAR}"
@@ -140,6 +143,9 @@ __test_get_entity_id() {
 
   # Event
   name="bs-c-2024"; result="$(__get_entity_id "event" " b's. !C " "2024")"
+  [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
+
+  name="aa-n-bb-n-cc-dd-ee-ff-2024"; result="$(__get_entity_id "event" " AA&BB & CC-DD - ee -- ff" "2024")"
   [ "$result" != "$name" ] && echo -e "- $name\nx $result" && exit 1
 
   echo "  - v ${FUNCNAME[0]}"
