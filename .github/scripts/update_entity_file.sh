@@ -75,11 +75,11 @@ if [ "$error_msg" != "" ]; then
 fi
 
 # Update input file: convert values from array to string.
-if [ "$ENTITY_TYPE" = "org" ]; then
-  ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_ORG_ARRAY_KEYS[@]}"
-elif [ "$ENTITY_TYPE" = "event" ]; then
-  ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_EVENT_ARRAY_KEYS[@]}"
-fi
+# if [ "$ENTITY_TYPE" = "org" ]; then
+#   ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_ORG_ARRAY_KEYS[@]}"
+# elif [ "$ENTITY_TYPE" = "event" ]; then
+#   ky_update_file_to_convert_value_from_array_to_string "$INPUT_FILE" "${KY_EVENT_ARRAY_KEYS[@]}"
+# fi
 
 # Prepare edit file to update entity.
 EDIT_FILE=$(ky_prepare_edit_file_to_update_entity "$ENTITY_FILE")

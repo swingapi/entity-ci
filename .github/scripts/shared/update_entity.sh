@@ -61,8 +61,11 @@ ky_update_file_with_modified_data() {
     if [ "$value" = "x" ]; then
       value=""
     elif [ "$key" = "styles" ]; then
-      value="${value#"UPDATE"}"
-      value="${value#","}"
+      if [ "$value" = "SAME" ]; then
+        continue
+      elif [ "$value" = "ANY" ]; then
+        value=""
+      fi
     fi
     jq --arg jq_key "$key" --arg jq_value "$value" '.[$jq_key] = $jq_value' "$EDIT_FILE" > "$tmp" && mv "$tmp" "$EDIT_FILE"
 
