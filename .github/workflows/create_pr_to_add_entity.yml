@@ -75,10 +75,12 @@ jobs:
       - name: Create Entity File - Results
         env:
           RESULTS_ERROR: ${{ steps.create-entity-file.outputs.error }}
+          RESULTS_SUMMARY: ${{ steps.create-entity-file.outputs.summary }}
           RESULTS_FILE_PATH: ${{ steps.create-entity-file.outputs.file_path }}
           RESULTS_FILE_PREVIEW: ${{ steps.create-entity-file.outputs.file_preview }}
         run: |
           echo "Error: $RESULTS_ERROR"
+          echo "Summary: $RESULTS_SUMMARY"
           echo "File Path: $RESULTS_FILE_PATH"
           echo "File Preview: $RESULTS_FILE_PREVIEW"
 
@@ -92,10 +94,10 @@ jobs:
           committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
           author: Github Actions <noreply@github.com>
           commit-message: |
-            ${{ github.event.issue.title }} - by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
+            ${{ steps.create-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
 
               File: ${{ steps.create-entity-file.outputs.file_path }}
-          title: ${{ github.event.issue.title }} - by ${{ github.event.issue.user.login }}
+          title: ${{ steps.create-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }}
           labels: |
             add entity
           branch: add-entity-${{ github.event.issue.number }}

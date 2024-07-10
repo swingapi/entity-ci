@@ -139,8 +139,18 @@ echo
 echo "Original File Preview: $original_file_preview_content"
 echo "Updated File Preview: $updated_file_preview_content"
 
+entity_name="$(jq -r '.name' "$ENTITY_FILE")"
+if [ "$ENTITY_TYPE" = "event" ]; then
+  pr_title="[$YEAR/$CODE] Update Event: $entity_name"
+else
+  pr_title="[$CODE] Update Org: $entity_name"
+fi
+
 if [ -z "$LOCAL_DEBUG" ]; then
-  echo "file_path=$ENTITY_FILE" >> "$GITHUB_OUTPUT"
+  {
+    echo "summary=$pr_title"
+    echo "file_path=$ENTITY_FILE"
+  } >> "$GITHUB_OUTPUT"
 
   EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
   {

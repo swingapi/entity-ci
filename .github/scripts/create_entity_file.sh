@@ -127,8 +127,18 @@ echo
 file_preview_content="$(cat "$ENTITY_FILE")"
 echo "File Preview: $file_preview_content"
 
+entity_name="$(jq -r '.name' "$ENTITY_FILE")"
+if [ "$ENTITY_TYPE" = "event" ]; then
+  pr_title="[$YEAR/$CODE] Add Event: $entity_name"
+else
+  pr_title="[$CODE] Add Org: $entity_name"
+fi
+
 if [ -z "$LOCAL_DEBUG" ]; then
-  echo "file_path=$ENTITY_FILE" >> "$GITHUB_OUTPUT"
+  {
+    echo "summary=$pr_title"
+    echo "file_path=$ENTITY_FILE"
+  } >> "$GITHUB_OUTPUT"
 
   EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
   {
