@@ -53,7 +53,7 @@ ky_update_file_with_modified_data() {
 
   while read -r key; do
     value=$(jq -r ".${key}" "$INPUT_FILE")
-    if [ -z "$value" ]; then
+    if [ -z "$value" ] || [ "$value" = null ]; then
       continue
     fi
 
@@ -69,7 +69,7 @@ ky_update_file_with_modified_data() {
     fi
     jq --arg jq_key "$key" --arg jq_value "$value" '.[$jq_key] = $jq_value' "$EDIT_FILE" > "$tmp" && mv "$tmp" "$EDIT_FILE"
 
-  done < <(jq -r 'keys_unsorted[]' "$ENTITY_FILE")
+  done < <(jq -r 'keys_unsorted[]' "$KY_TEMPLATE_ID.json")
 }
 
 # MARK: - _LEGACY
