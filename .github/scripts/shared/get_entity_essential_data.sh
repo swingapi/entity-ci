@@ -23,16 +23,6 @@ ky_get_entity_essential_data() {
 
   # shellcheck source=/dev/null
   source "$(dirname "$0")/shared/constants.sh"
-
-  # Year.
-  if [ "$ENTITY_TYPE" = "event" ]; then 
-    year="$(jq -r '.year' "$INPUT_FILE")"
-    if [ "$year" = null ] || [ -z "$year" ]; then
-      local date_starts; date_starts="$(jq -r '.date_starts' "$INPUT_FILE")"
-      IFS="-" read -r -a date_components <<< "$date_starts" || 'true'
-      year="${date_components[0]}"
-    fi
-  fi
   
   # Code.
   local region; region="$(jq -r '.region' "$INPUT_FILE")"
@@ -43,18 +33,35 @@ ky_get_entity_essential_data() {
   # Entity ID.
   local entity_id
   entity_id="$(jq -r '.id' "$INPUT_FILE")"
-  # - Generate Entity ID for new one.
+
+  # Is Entity Creation
   if [ -z "$entity_id" ] || [ "$entity_id" = null ]; then
-    local name; name="$(jq -r '.name' "$INPUT_FILE")"
-    entity_id="$(__get_entity_id "$ENTITY_TYPE" "$name" "$year")"
-    if [ -z "$entity_id" ]; then
-      error_msg="Invalid Entity ID Generated from Name."
-      local array_string; array_string=$(ky_join_strings "$year" "$code" "$entity_id" "$entity_file" "$error_msg")
-      echo "$array_string"
-      exit 0
+    # - Get year from date_starts for EVENT.
+    if [ "$ENTITY_TYPE" = "event" ]; then 
+      local date_starts; date_starts="$(jq -r '.date_starts' "$INPUT_FILE")"
+      IFS="-" read -r -a date_components <<< "$date_starts" || 'true'
+      year="${date_components[0]}"
     fi
-    local tmp; tmp=$(mktemp)
-    jq --arg jq_value "$entity_id" '.id = $jq_value' "$INPUT_FILE" > "$tmp" && mv "$tmp" "$INPUT_FILE"
+
+    # - Generate Entity ID for new one.
+    if [ -z "$entity_id" ] || [ "$entity_id" = null ]; then
+      local name; name="$(jq -r '.name' "$INPUT_FILE")"
+      entity_id="$(__get_entity_id "$ENTITY_TYPE" "$name" "$year")"
+      if [ -z "$entity_id" ]; then
+        error_msg="Invalid Entity ID Generated from Name."
+        local array_string; array_string=$(ky_join_strings "$year" "$code" "$entity_id" "$entity_file" "$error_msg")
+        echo "$array_string"
+        exit 0
+      fi
+      local tmp; tmp=$(mktemp)
+      jq --arg jq_value "$entity_id" '.id = $jq_value' "$INPUT_FILE" > "$tmp" && mv "$tmp" "$INPUT_FILE"
+    fi
+  # Is Entity Updating
+  else
+    # - Get year from id for EVENT (last 4 chars), e.g., "abc-2024".
+    if [ "$ENTITY_TYPE" = "event" ]; then 
+      year="${entity_id: -4}"
+    fi
   fi
 
   echo "year: $year, region: $region, code: $code, entity_id: $entity_id" >&2
