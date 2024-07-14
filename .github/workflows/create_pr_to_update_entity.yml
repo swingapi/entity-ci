@@ -96,12 +96,12 @@ jobs:
           committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
           author: Github Actions <noreply@github.com>
           commit-message: |
-            ${{ steps.update-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
+            ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
 
               File: ${{ steps.update-entity-file.outputs.file_path }}
-          title: ${{ steps.update-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }}
+          title: ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ github.event.issue.user.login }}
           labels: |
-            update entity
+            update ${{ inputs.type }}
           branch: update-entity-${{ github.event.issue.number }}
           delete-branch: true
           body: |

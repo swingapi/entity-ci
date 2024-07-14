@@ -94,12 +94,12 @@ jobs:
           committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
           author: Github Actions <noreply@github.com>
           commit-message: |
-            ${{ steps.create-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
+            ${{ steps.create-entity-file.outputs.summary }} - Added by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
 
               File: ${{ steps.create-entity-file.outputs.file_path }}
-          title: ${{ steps.create-entity-file.outputs.summary }} - by ${{ github.event.issue.user.login }}
+          title: ${{ steps.create-entity-file.outputs.summary }} - Added by ${{ github.event.issue.user.login }}
           labels: |
-            add entity
+            add ${{ inputs.type }}
           branch: add-entity-${{ github.event.issue.number }}
           delete-branch: true
           body: |

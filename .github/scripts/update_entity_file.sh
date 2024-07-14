@@ -141,9 +141,9 @@ echo "Updated File Preview: $updated_file_preview_content"
 
 entity_name="$(jq -r '.name' "$ENTITY_FILE")"
 if [ "$ENTITY_TYPE" = "event" ]; then
-  pr_title="[$YEAR/$CODE] Update Event: $entity_name"
+  pr_title="[$YEAR/$CODE] $entity_name"
 else
-  pr_title="[$CODE] Update Org: $entity_name"
+  pr_title="[$CODE] $entity_name"
 fi
 
 if [ -z "$LOCAL_DEBUG" ]; then

@@ -129,9 +129,9 @@ echo "File Preview: $file_preview_content"
 
 entity_name="$(jq -r '.name' "$ENTITY_FILE")"
 if [ "$ENTITY_TYPE" = "event" ]; then
-  pr_title="[$YEAR/$CODE] Add Event: $entity_name"
+  pr_title="[$YEAR/$CODE] $entity_name"
 else
-  pr_title="[$CODE] Add Org: $entity_name"
+  pr_title="[$CODE] $entity_name"
 fi
 
 if [ -z "$LOCAL_DEBUG" ]; then
