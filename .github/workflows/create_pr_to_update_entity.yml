@@ -92,14 +92,18 @@ jobs:
         id: cpr
         if: steps.update-entity-file.outputs.error == ''
         uses: peter-evans/create-pull-request@v6
+        env:
+          FILE_URL: ${{ github.server_url }}/${{ github.repository }}/blob/main/${{ steps.update-entity-file.outputs.file_path }}
+          CONTRIBUTOR: ${{ github.event.issue.user.login }}
         with:
           committer: Github Actions - ${{ github.run_id }} <noreply@github.com>
           author: Github Actions <noreply@github.com>
           commit-message: |
-            ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ github.event.issue.user.login }} (#${{ github.event.issue.number }})
+            ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ env.CONTRIBUTOR }} (#${{ github.event.issue.number }})
 
-              File: ${{ steps.update-entity-file.outputs.file_path }}
-          title: ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ github.event.issue.user.login }}
+              File: ${{ env.FILE_URL }}  
+              Contributor: https://github.com/${{ env.CONTRIBUTOR }}
+          title: ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ env.CONTRIBUTOR }}
           labels: |
             update ${{ inputs.type }}
           branch: update-entity-${{ github.event.issue.number }}
@@ -108,7 +112,7 @@ jobs:
             Closes #${{ github.event.issue.number }}
 
             **File Path**
-            > [${{ steps.update-entity-file.outputs.file_path }}][1].
+            > [${{ steps.update-entity-file.outputs.file_path }}](${{ env.FILE_URL }})
 
             **Original File Preview**
             ```json
@@ -119,8 +123,6 @@ jobs:
             ```json
             ${{ steps.update-entity-file.outputs.updated_file_preview }}
             ```
-
-            [1]: ${{ github.server_url }}/${{ github.repository }}/blob/main/${{ steps.update-entity-file.outputs.file_path }}
 
       # Leave a comment on the issue.
 
