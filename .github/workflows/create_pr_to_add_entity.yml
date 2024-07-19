@@ -99,8 +99,8 @@ jobs:
           commit-message: |
             ${{ steps.create-entity-file.outputs.summary }} - Added by ${{ env.CONTRIBUTOR }} (#${{ github.event.issue.number }})
 
-              File: ${{ env.FILE_URL }}  
-              Contributor: https://github.com/${{ env.CONTRIBUTOR }}
+            - File: ${{ env.FILE_URL }}  
+            - Contributor: https://github.com/${{ env.CONTRIBUTOR }}
           title: ${{ steps.create-entity-file.outputs.summary }} - Added by ${{ env.CONTRIBUTOR }}
           labels: |
             add ${{ inputs.type }}

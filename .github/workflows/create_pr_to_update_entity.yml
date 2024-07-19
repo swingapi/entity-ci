@@ -101,8 +101,8 @@ jobs:
           commit-message: |
             ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ env.CONTRIBUTOR }} (#${{ github.event.issue.number }})
 
-              File: ${{ env.FILE_URL }}  
-              Contributor: https://github.com/${{ env.CONTRIBUTOR }}
+            - File: ${{ env.FILE_URL }}  
+            - Contributor: https://github.com/${{ env.CONTRIBUTOR }}
           title: ${{ steps.update-entity-file.outputs.summary }} - Updated by ${{ env.CONTRIBUTOR }}
           labels: |
             update ${{ inputs.type }}
