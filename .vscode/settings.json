@@ -1,6 +1,7 @@
 {
   "files.exclude": {
-    ".gitignore": true,
-    "LICENSE": true
+    "**/.gitignore": true,
+    "**/.gitmodules": true,
+    "**/LICENSE": true
   }
 }
