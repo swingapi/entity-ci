@@ -270,7 +270,11 @@ __insert_line_before_template_anchor() {
   escaped_line="${line//\//\\/}"        # "/" > "\/"
   escaped_line="${escaped_line//&/\\&}" # "&" > "\&"
 
-  sed -i '' -e "s/\($anchor\)/$escaped_line\n\1/g" "$file"
+  if [ -n "$G_IS_CI" ]; then
+    sed -i "s/\($anchor\)/$escaped_line\n\1/g" "$file"
+  else
+    sed -i '' -e "s/\($anchor\)/$escaped_line\n\1/g" "$file"
+  fi
   #sed -i '' -e "s/\($anchor\)/${escaped_line//&/\\&}\n\1/g" "$file"
 }
 
