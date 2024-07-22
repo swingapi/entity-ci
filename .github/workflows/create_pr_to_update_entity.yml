@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_BASE_URL: "${{ github.server_url }}/${{ github.repository }}"
+      LOCALIZATION_REPO_DIR: localization
+      REGIONS_REPO_DIR: localization_regions
       REUSABLE_WORKFLOW_DIR: entity-ci
       ISSUE_PARSED_FILE: update_entity_issue.json
 
@@ -41,9 +43,26 @@ jobs:
       - name: Checkout the caller workflow repo.
         uses: actions/checkout@v4
 
+      - name: Checkout the localization repo.
+        uses: actions/checkout@v4
+        with:
+          repository: "swingdance/localizations"
+          ref: "main"
+          path: ${{ env.LOCALIZATION_REPO_DIR }}
+          token: ${{ secrets.token }}
+
+      - name: Checkout the regions repo.
+        uses: actions/checkout@v4
+        with:
+          repository: "swingdance/regions"
+          ref: "main"
+          path: ${{ env.REGIONS_REPO_DIR }}
+          token: ${{ secrets.token }}
+
       - name: Checkout this reusable workflow repo (for *.sh scripts).
         uses: actions/checkout@v4
         with:
+          submodules: recursive
           repository: ${{ inputs.reusable_workflow_repo }}
           ref: ${{ inputs.reusable_workflow_repo_ref }}
           path: ${{ env.REUSABLE_WORKFLOW_DIR }}
@@ -70,7 +89,7 @@ jobs:
           CONTRIBUTOR: ${{ github.event.issue.user.login }}
         run: |
           ./$REUSABLE_WORKFLOW_DIR/.github/scripts/update_entity_file.sh "${{ inputs.type }}" "$ISSUE_PARSED_FILE" "$CONTRIBUTOR"
-          rm -rf "$REUSABLE_WORKFLOW_DIR"
+          rm -rf "$REUSABLE_WORKFLOW_DIR" "$LOCALIZATION_REPO_DIR" "$REGIONS_REPO_DIR"
 
       - name: Update Entity File - Results
         env:

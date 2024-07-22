@@ -14,6 +14,11 @@ INPUT_FILE=$2
 INPUT_CONTRIBUTOR=$3
 LOCAL_DEBUG=$4
 
+G_IS_CI="1"
+export G_IS_CI
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/log-sh/ky_log.sh"
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/constants.sh"
 # shellcheck source=/dev/null
@@ -23,7 +28,8 @@ source "$(dirname "$0")/shared/update_entity.sh"
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/get_entity_essential_data.sh"
 
-# Get entity essential data.
+
+# MARK: Get entity essential data.
 
 read -r entity_essential_data <<< "$(ky_get_entity_essential_data "$ENTITY_TYPE" "$INPUT_FILE" "$LOCAL_DEBUG")"
 IFS=$'\n' read -rd '' -a entity_essential_data_values <<< "${entity_essential_data//$KY_STRING_DELIMITER/$'\n'}" || 'true'
@@ -94,7 +100,8 @@ ky_update_file_to_update_contributors "$EDIT_FILE" "$INPUT_CONTRIBUTOR"
 # Delete all empty key-value pairs.
 ky_update_file_to_delete_all_empty_key_value_pairs "$EDIT_FILE"
 
-# Save and sort entity file.
+
+# MARK: Save and sort entity file
 
 if [ -n "$LOCAL_DEBUG" ]; then
   echo
@@ -118,7 +125,24 @@ echo "### Sort the entity file ($ENTITY_FILE)."
 source "$(dirname "$0")/shared/sort_json_file.sh"
 ky_sort_json_file "$ENTITY_FILE"
 
-# Clean up.
+
+# MARK: Compose site files
+echo
+echo "### Compose site files."
+
+if [ "$ENTITY_TYPE" = "org" ]; then
+  # shellcheck source=/dev/null
+  source "$(dirname "$0")/site-entity-file-composition/org/site_file_composition.sh"
+  compose_site_files "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+
+elif [ "$ENTITY_TYPE" = "event" ]; then
+  # shellcheck source=/dev/null
+  source "$(dirname "$0")/site-entity-file-composition/event/site_file_composition.sh"
+  compose_site_files "$YEAR" "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+fi
+
+
+# MARK: Clean up.
 
 if [ -z "$LOCAL_DEBUG" ]; then
   echo
@@ -134,7 +158,8 @@ echo
 # echo "Remove temp folder: $TEMP_FOLDER"
 # rm -rfv $TEMP_FOLDER
 
-# File Preview.
+
+# MARK: File Preview
 
 echo "Original File Preview: $original_file_preview_content"
 echo "Updated File Preview: $updated_file_preview_content"

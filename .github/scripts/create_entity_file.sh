@@ -14,6 +14,11 @@ INPUT_FILE=$2
 INPUT_CONTRIBUTOR=$3
 LOCAL_DEBUG=$4
 
+G_IS_CI="1"
+export G_IS_CI
+
+# shellcheck source=/dev/null
+source "$(dirname "$0")/log-sh/ky_log.sh"
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/constants.sh"
 # shellcheck source=/dev/null
@@ -23,7 +28,8 @@ source "$(dirname "$0")/shared/create_entity.sh"
 # shellcheck source=/dev/null
 source "$(dirname "$0")/shared/get_entity_essential_data.sh"
 
-# Get entity essential data.
+
+# MARK: Get entity essential data.
 
 # read -r CODE ENTITY_ID ENTITY_FILE error_msg <<< $(ky_get_entity_essential_data $INPUT_FILE $LOCAL_DEBUG)
 read -r entity_essential_data <<< "$(ky_get_entity_essential_data "$ENTITY_TYPE" "$INPUT_FILE" "$LOCAL_DEBUG")"
@@ -75,7 +81,8 @@ if [ "$error_msg" != "" ]; then
   exit 1
 fi
 
-# Edit JSON file
+
+# MARK: Edit JSON file
 
 # Prepare edit file to create entity.
 EDIT_FILE="$(ky_prepare_edit_file_to_create_entity "$INPUT_FILE" "$LOCAL_DEBUG")"
@@ -101,7 +108,8 @@ ky_update_file_to_delete_all_empty_key_value_pairs "$EDIT_FILE"
 #   echo "- $key: $value"
 # done
 
-# Save and sort entity file.
+
+# MARK: Save and sort entity file.
 
 echo
 echo "### Save the edited file ($EDIT_FILE)."
@@ -112,7 +120,24 @@ echo "### Sort the entity file ($ENTITY_FILE)."
 source "$(dirname "$0")/shared/sort_json_file.sh"
 ky_sort_json_file "$ENTITY_FILE"
 
-# Clean up.
+
+# MARK: Compose site files
+echo
+echo "### Compose site files."
+
+if [ "$ENTITY_TYPE" = "org" ]; then
+  # shellcheck source=/dev/null
+  source "$(dirname "$0")/site-entity-file-composition/org/site_file_composition.sh"
+  compose_site_files_for_one_entity "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+
+elif [ "$ENTITY_TYPE" = "event" ]; then
+  # shellcheck source=/dev/null
+  source "$(dirname "$0")/site-entity-file-composition/event/site_file_composition.sh"
+  compose_site_files_for_one_entity "$YEAR" "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+fi
+
+
+# MARK: Clean up.
 
 echo
 echo "### DONE ###"
@@ -122,7 +147,8 @@ echo
 # echo "Remove temp folder: $TEMP_FOLDER"
 # rm -rfv $TEMP_FOLDER
 
-# File Preview.
+
+# MARK: File Preview.
 
 file_preview_content="$(cat "$ENTITY_FILE")"
 echo "File Preview: $file_preview_content"
