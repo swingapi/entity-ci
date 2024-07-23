@@ -133,12 +133,12 @@ echo "### Compose site files."
 if [ "$ENTITY_TYPE" = "org" ]; then
   # shellcheck source=/dev/null
   source "$(dirname "$0")/site-entity-file-composition/org/site_file_composition.sh"
-  compose_site_files "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+  compose_site_files_for_one_entity "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
 
 elif [ "$ENTITY_TYPE" = "event" ]; then
   # shellcheck source=/dev/null
   source "$(dirname "$0")/site-entity-file-composition/event/site_file_composition.sh"
-  compose_site_files "$YEAR" "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
+  compose_site_files_for_one_entity "$YEAR" "$CODE" "$ENTITY_ID" "$ENTITY_FILE"
 fi
 
 
