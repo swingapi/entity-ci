@@ -115,6 +115,10 @@ sd_entity_file_composition_map_entity_contact_section() {
   echo -e "\n## ${g_localized_entity_contact_title:?}\n" >> "$tmp_entity_contact_file"
 
   # Contact Common
+  KY_ENTITY_CONTACT_COMMON_KEYS=(
+      "email"
+      "website"
+  )
   for contact_key in "${KY_ENTITY_CONTACT_COMMON_KEYS[@]}"; do
     # template_value_key="{KY_VALUE_$contact_key}"
     value=$(jq -r ".${contact_key}" "$entity_json_file")
@@ -142,6 +146,14 @@ sd_entity_file_composition_map_entity_contact_section() {
   # Social Links
   local social_links=""
 
+  KY_ENTITY_CONTACT_SOCIAL_LINK_KEYS=(
+      "fb"
+      "ig"
+      "yt"
+      "bl"
+      "rb"
+      "wo"
+  )
   for contact_key in "${KY_ENTITY_CONTACT_SOCIAL_LINK_KEYS[@]}"; do
     # template_value_key="{KY_VALUE_$contact_key}"
     value=$(jq -r ".${contact_key}" "$entity_json_file")
