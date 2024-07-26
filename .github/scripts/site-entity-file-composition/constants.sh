@@ -9,7 +9,7 @@ export KY_MD_DIR KY_ICS_DIR
 # Org Specific Constants
 
 KY_SWING_KIDS_LANGS=(
-    "en"
+    "default"
     "zh-Hans"
 )
 export KY_SWING_KIDS_LANGS
@@ -20,7 +20,7 @@ export KY_SWING_KIDS_LANGS
 # Event Specific Constants
 
 KY_SWING_NEWS_LANGS=(
-    "en"
+    "default"
     "zh-Hans"
 )
 export KY_SWING_NEWS_LANGS

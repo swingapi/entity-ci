@@ -13,7 +13,9 @@ sd_compose_entity_ics_file() {
   ky_func_log_verbose "${FUNCNAME[0]}" "- * $INPUT_ENTITY_FILE"
 
   # UID
-  local event_uid="swing-news_${INPUT_LANG}_${INPUT_REGION}_${INPUT_ENTITY_ID}"
+  local event_uid_lang
+  [ "$INPUT_LANG" != "default" ] && event_uid_lang="${INPUT_LANG}_"
+  local event_uid="swing-news_${event_uid_lang}${INPUT_REGION}_${INPUT_ENTITY_ID}"
 
   # URL
   local event_url="https://swing.news"
