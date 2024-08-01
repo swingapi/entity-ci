@@ -63,6 +63,7 @@ compose_site_files_for_one_entity() {
     [ ! -d "$region_dir" ] && mkdir -p "$region_dir"
 
     entity_ics_file="$region_dir/$INPUT_ENTITY_ID.ics"
+    [ -f "$entity_ics_file" ] && rm "$entity_ics_file"
     echo "- $entity_ics_file"
     touch "$entity_ics_file"
     sd_compose_entity_ics_file "$lang" "$INPUT_YEAR" "$INPUT_REGION" "$INPUT_ENTITY_ID" "$entity_ics_file" "$INPUT_ENTITY_JSON_FILE"
