@@ -15,7 +15,6 @@ KY_TEMPLATE_ORG_COMMON_KEYS=(
 )
 KY_TEMPLATE_ORG_MULTILINE_SECTION_KEYS=(
     "venue"
-    "party"
     "notes"
 )
 
@@ -37,6 +36,8 @@ sd_compose_entity_md_file() {
   sd_entity_file_composition_map_entity_city_value "$entity_json_file" "$entity_file" "$lang" "$region_code"
   # Styles Value
   sd_entity_file_composition_map_entity_styles_value "$entity_json_file" "$entity_file"
+  # Party
+  __map_entity_page_party "$entity_json_file" "$entity_file" "$lang"
   # Page URLs
   __map_entity_page_urls "$entity_json_file" "$entity_file" "$region_code"
   # Contact Section
@@ -82,6 +83,80 @@ __map_entity_page_metadata() {
   template_value_key="{KY_VALUE_description.name}"
   awk -v s="$template_value_key" -v r="${name//&/\\\\&}" '{sub(s,r)}1' "$tmp_entity_file" > "$tmp"
   mv "$tmp" "$tmp_entity_file"
+}
+
+# MARK: _Mapping - Party
+__map_entity_page_party() {
+  local INPUT_ENTITY_JSON_FILE=$1
+  local INPUT_ENTITY_FILE=$2
+  local INPUT_LANG=$3
+  ky_func_log_verbose "${FUNCNAME[0]}" ""
+
+  local section_key="party"
+  local template_section_start="KY_SECTION_$section_key"
+  local template_section_end="$template_section_start END"
+
+  local raw_value; raw_value="$(jq -r ".${section_key}" "$INPUT_ENTITY_JSON_FILE")"
+
+  local multiline_content=""
+  if [ -n "$raw_value" ] && [ "$raw_value" != null ]; then
+    local day_and_times localized_day day time
+    IFS=',' read -r -a day_and_times <<< "$raw_value"
+    for day_and_time in "${day_and_times[@]}"; do
+      day="${day_and_time%-*}"
+      localized_day="$(__localized_party_week_day "$INPUT_LANG" "$day")"
+      if [ -z "$localized_day" ]; then
+        continue
+      fi
+      time="${day_and_time#*-}"
+      multiline_content="${multiline_content}    ${localized_day} ${time//~/ ~ }  \n"
+    done
+  fi
+
+  if [ -z "$multiline_content" ]; then
+    ky_sed_delete "$INPUT_ENTITY_FILE" "$template_section_start/,/$template_section_end"
+  else
+    ky_sed_delete "$INPUT_ENTITY_FILE" "$template_section_start"
+    ky_sed_delete "$INPUT_ENTITY_FILE" "$template_section_end"
+
+    multiline_content="$(echo -e "$multiline_content")"
+
+    local template_value_key="{KY_VALUE_$section_key}"
+    local tmp; tmp=$(mktemp)
+    awk '
+    BEGIN { s=ARGV[1]; r=ARGV[2]; delete ARGV[1]; delete ARGV[2]; }
+    { sub(s,r) }1
+    END {}' "$template_value_key" "$multiline_content" "$INPUT_ENTITY_FILE" > "$tmp"
+    mv "$tmp" "$INPUT_ENTITY_FILE"
+  fi
+}
+
+# MARK: _Mapping - Party - Week Day
+__localized_party_week_day() {
+  local INPUT_LANG=$1
+  local INPUT_DAY=$2
+
+  local localized_day
+  if [ "$INPUT_LANG" = "zh-Hans" ]; then
+    if   [ "$INPUT_DAY" = "5" ]; then localized_day="每周五"
+    elif [ "$INPUT_DAY" = "6" ]; then localized_day="每周六"
+    elif [ "$INPUT_DAY" = "0" ]; then localized_day="每周日"
+    elif [ "$INPUT_DAY" = "1" ]; then localized_day="每周一"
+    elif [ "$INPUT_DAY" = "2" ]; then localized_day="每周二"
+    elif [ "$INPUT_DAY" = "3" ]; then localized_day="每周三"
+    elif [ "$INPUT_DAY" = "4" ]; then localized_day="每周四"
+    fi
+  else
+    if   [ "$INPUT_DAY" = "5" ]; then localized_day="Every Friday"
+    elif [ "$INPUT_DAY" = "6" ]; then localized_day="Every Saturday"
+    elif [ "$INPUT_DAY" = "0" ]; then localized_day="Every Sunday"
+    elif [ "$INPUT_DAY" = "1" ]; then localized_day="Every Monday"
+    elif [ "$INPUT_DAY" = "2" ]; then localized_day="Every Tuesday"
+    elif [ "$INPUT_DAY" = "3" ]; then localized_day="Every Wednesday"
+    elif [ "$INPUT_DAY" = "4" ]; then localized_day="Every Thursday"
+    fi
+  fi
+  echo "$localized_day"
 }
 
 # MARK: _Mapping - Page URLs
