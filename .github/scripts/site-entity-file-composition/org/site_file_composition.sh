@@ -33,6 +33,7 @@ compose_site_files_for_one_entity() {
   local lang_folder_name region_dir entity_md_file
 
   for lang in "${KY_SWING_KIDS_LANGS[@]}"; do
+    echo "# Compose site files for $lang"
     sd_prepare_shared_localized_text_for_lang "$lang"
 
     lang_folder_name="$(ky_get_lang_folder_name "$lang")"
@@ -48,6 +49,7 @@ compose_site_files_for_one_entity() {
     [ ! -d "$region_dir" ] && mkdir -p "$region_dir"
 
     entity_md_file="$region_dir/$INPUT_ENTITY_ID.md"
+    echo "- $entity_md_file"
     cp "$template_file" "$entity_md_file"
     sd_compose_entity_md_file "$lang" "$INPUT_REGION" "$entity_md_file" "$INPUT_ENTITY_JSON_FILE"
   done

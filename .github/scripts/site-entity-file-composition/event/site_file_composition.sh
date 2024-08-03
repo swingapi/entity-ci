@@ -45,6 +45,7 @@ compose_site_files_for_one_entity() {
   local lang_folder_name region_dir entity_md_file entity_ics_file
 
   for lang in "${KY_SWING_NEWS_LANGS[@]}"; do
+    echo "# Compose site files for $lang"
     sd_prepare_shared_localized_text_for_lang "$lang"
 
     lang_folder_name="$(ky_get_lang_folder_name "$lang")"
@@ -63,8 +64,8 @@ compose_site_files_for_one_entity() {
     [ ! -d "$region_dir" ] && mkdir -p "$region_dir"
 
     entity_ics_file="$region_dir/$INPUT_ENTITY_ID.ics"
-    [ -f "$entity_ics_file" ] && rm "$entity_ics_file"
     echo "- $entity_ics_file"
+    [ -f "$entity_ics_file" ] && rm "$entity_ics_file"
     touch "$entity_ics_file"
     sd_compose_entity_ics_file "$lang" "$INPUT_YEAR" "$INPUT_REGION" "$INPUT_ENTITY_ID" "$entity_ics_file" "$INPUT_ENTITY_JSON_FILE"
   done
