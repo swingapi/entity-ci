@@ -15,7 +15,7 @@ tags:
 :fontawesome-solid-location-dot: {KY_VALUE_city}  
 <!--- KY_SECTION_organizer -->
 
-!!! info "组织者"
+!!! info "组织方"
 
 {KY_VALUE_organizer}
 <!--- KY_SECTION_organizer END -->
