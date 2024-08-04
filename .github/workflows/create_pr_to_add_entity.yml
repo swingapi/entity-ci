@@ -33,6 +33,7 @@ jobs:
       REPO_BASE_URL: "${{ github.server_url }}/${{ github.repository }}"
       LOCALIZATION_REPO_DIR: localization
       REGIONS_REPO_DIR: localization_regions
+      ORGS_REPO_DIR: orgs
       REUSABLE_WORKFLOW_DIR: entity-ci
       ISSUE_PARSED_FILE: new_entity_issue.json
 
@@ -57,6 +58,15 @@ jobs:
           repository: "swingdance/regions"
           ref: "main"
           path: ${{ env.REGIONS_REPO_DIR }}
+          token: ${{ secrets.token }}
+
+      - name: Checkout the orgs repo (get organizers for the event).
+        if: ${{ inputs.type == 'event' }}
+        uses: actions/checkout@v4
+        with:
+          repository: "swingdance/orgs"
+          ref: "main"
+          path: ${{ env.ORGS_REPO_DIR }}
           token: ${{ secrets.token }}
 
       - name: Checkout this reusable workflow repo (for *.sh scripts).
@@ -89,7 +99,7 @@ jobs:
           CONTRIBUTOR: ${{ github.event.issue.user.login }}
         run: |
           ./$REUSABLE_WORKFLOW_DIR/.github/scripts/create_entity_file.sh "${{ inputs.type }}" "$ISSUE_PARSED_FILE" "$CONTRIBUTOR"
-          rm -rf "$REUSABLE_WORKFLOW_DIR" "$LOCALIZATION_REPO_DIR" "$REGIONS_REPO_DIR"
+          rm -rf "$REUSABLE_WORKFLOW_DIR" "$LOCALIZATION_REPO_DIR" "$REGIONS_REPO_DIR" "$ORGS_REPO_DIR"
 
       - name: Create Entity File - Results
         env:
