@@ -211,36 +211,43 @@ __map_entity_org_value() {
   local template_section_start="KY_SECTION_$section_key"
   local template_section_end="$template_section_start END"
 
-  local org_id; org_id=$(jq -r ".org_id" "$entity_json_file")
-  if [ -z "$org_id" ] || [ "$org_id" = null ]; then
+  local org_id_raw_value; org_id_raw_value=$(jq -r ".org_id" "$entity_json_file")
+  if [ -z "$org_id_raw_value" ] || [ "$org_id_raw_value" = null ]; then
     # sed -i '' -e "/$template_section_start/,/$template_section_end/d" "$tmp_entity_file"
     ky_sed_delete "$tmp_entity_file" "$template_section_start/,/$template_section_end"
     return
   fi
 
-  local content
-  local org_url="https://swing.kids/$region_code/$org_id"
-  local org_name
+  local content content_line
+  local org_name org_url org_csv_file matched_org_row
 
-  local org_csv_file="$G_ORG_CSV_REPO/regions/$region_code.csv"
-  if [ -f "$org_csv_file" ]; then
-    local matched_org_row; matched_org_row="$(csvgrep -c id -r "^$org_id$" "$org_csv_file" | csvcut -c "id,name,name_local")"
-    org_name="$(echo "$matched_org_row" | csvcut -c "name" | sed 1d)"
-  else
-    ky_func_log_warn "${FUNCNAME[0]}" "Org CSV file not found: $org_csv_file"
-  fi
-  
-  if [ -z "$org_name" ]; then
-    content="    [$org_id]($org_url)  "
-  else
-    content="    [$org_name]($org_url)  "
-    # TEST:
-    # $ csvgrep -c id -r "^rhythm-studio$" test_repos/orgs-csv/regions/zh_HK.csv | csvcut -c "id,name,name_local" | csvcut -c "name_local" | sed 1d
-    local org_name_local; org_name_local="$(echo "$matched_org_row" | csvcut -c "name_local" | sed 1d)"
-    if [ -n "$org_name_local" ] && [ "$org_name_local" != null ] && [ "$org_name_local" != "\"\"" ]; then
-      content="$(echo -e "$content\n    $org_name_local  ")"
+  IFS=',' read -r -a org_ids <<< "$org_id_raw_value"
+  for org_id in "${org_ids[@]}"; do
+    org_url="https://swing.kids/$region_code/$org_id"
+
+    org_csv_file="$G_ORG_CSV_REPO/regions/$region_code.csv"
+    if [ -f "$org_csv_file" ]; then
+      matched_org_row="$(csvgrep -c id -r "^$org_id$" "$org_csv_file" | csvcut -c "id,name,name_local")"
+      org_name="$(echo "$matched_org_row" | csvcut -c "name" | sed 1d)"
+    else
+      ky_func_log_warn "${FUNCNAME[0]}" "Org CSV file not found: $org_csv_file"
+      org_name=""
     fi
-  fi
+    
+    if [ -z "$org_name" ]; then
+      content_line="    [$org_id]($org_url)  "
+    else
+      # TEST:
+      # $ csvgrep -c id -r "^rhythm-studio$" test_repos/orgs-csv/regions/zh_HK.csv | csvcut -c "id,name,name_local" | csvcut -c "name_local" | sed 1d
+      local org_name_local; org_name_local="$(echo "$matched_org_row" | csvcut -c "name_local" | sed 1d)"
+      if [ -n "$org_name_local" ] && [ "$org_name_local" != null ] && [ "$org_name_local" != "\"\"" ]; then
+        content_line="    [$org_name]($org_url) • $org_name_local  "
+      else
+        content_line="    [$org_name]($org_url)  "
+      fi
+    fi
+    [ -z "$content" ] && content="$content_line" || content="$(echo -e "$content\n$content_line")"
+  done
 
   # sed -i '' -e "/$template_section_start/d" "$tmp_entity_file"
   # sed -i '' -e "/$template_section_end/d" "$tmp_entity_file"
