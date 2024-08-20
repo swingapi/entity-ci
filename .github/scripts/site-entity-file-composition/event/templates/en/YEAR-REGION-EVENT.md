@@ -10,9 +10,9 @@ tags:
 
 # {KY_VALUE_name} {KY_VALUE_session}
 
-{KY_VALUE_name_local}  
-:fontawesome-solid-calendar-days: {KY_VALUE_date}  
-:fontawesome-solid-location-dot: {KY_VALUE_city}  
+:fontawesome-solid-ticket:{ .ky_list_leading_icon } {KY_VALUE_name_local}  
+:fontawesome-solid-calendar-days:{ .ky_list_leading_icon } {KY_VALUE_date}  
+:fontawesome-solid-location-dot:{ .ky_list_leading_icon } {KY_VALUE_city}  
 <!--- KY_SECTION_organizer -->
 
 !!! info "Organizer"

@@ -131,13 +131,13 @@ sd_entity_file_composition_map_entity_contact_section() {
 
     # Email
     if [ "$contact_key" = "email" ]; then
-      echo ":fontawesome-solid-envelope: <$value>  " >> "$tmp_entity_contact_file"
+      echo ":fontawesome-solid-envelope:{ .ky_list_leading_icon } <$value>  " >> "$tmp_entity_contact_file"
     # Website
     elif [ "$contact_key" = "website" ]; then
-      echo ":fontawesome-solid-globe: <$value>{ target='_blank' }  " >> "$tmp_entity_contact_file"
+      echo ":fontawesome-solid-globe:{ .ky_list_leading_icon } <$value>{ target='_blank' }  " >> "$tmp_entity_contact_file"
     # Unknown
     else
-      echo ":fontawesome-fa-question: $value  " >> "$tmp_entity_contact_file"
+      echo ":fontawesome-fa-question:{ .ky_list_leading_icon } $value  " >> "$tmp_entity_contact_file"
     fi
     # awk -v s="$template_value_key" -v r="${adjusted_value//&/\\\\&}" '{sub(s,r)}1' "$tmp_entity_contact_file" > "$tmp"
     # mv "$tmp" "$tmp_entity_contact_file"
