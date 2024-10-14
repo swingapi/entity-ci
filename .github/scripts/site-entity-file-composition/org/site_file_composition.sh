@@ -17,6 +17,9 @@ compose_site_files_for_one_entity() {
 
   if [ -n "$G_IS_CI" ]; then
     echo "Install csvkit..."
+    python3 -m venv .venv
+    # shellcheck source=/dev/null
+    source .venv/bin/activate
     pip install -q csvkit
   fi
 
